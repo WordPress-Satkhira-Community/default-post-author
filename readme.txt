@@ -1,7 +1,7 @@
 === Default Post Author ===
 Contributors: monarchwp23,wpdelower
 Tags: post author, default post author, wp post, posts
-Requires at least: 5.7
+Requires at least: 6.1
 Tested up to: 6.4.2
 Requires PHP: 7.4
 Stable tag: 1.0
