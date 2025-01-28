@@ -2,16 +2,18 @@
 Contributors: monarchwp23,wpdelower
 Tags: post author, default post author, wp post, posts
 Requires at least: 6.1
-Tested up to: 6.4.2
+Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Donate Link: https://www.wpsatkhira.com/donate
 
-The easiest way to set default post author in your WordPress Site.
+The easiest way to set a default post author in your WordPress Site.
 
 == Description ==
+
+**Try Default Post Author on a demo site: Click here => https://tastewp.org/plugins/default-post-author/ **
 
 The "Default Post Author" plugin is a powerful tool designed to simplify the process of setting a default post author on your WordPress site. With this plugin, you can easily define a default author for all new posts, ensuring consistency and saving you valuable time.
 
@@ -60,10 +62,21 @@ Yes! It's compatible with both single sites and multisite.
 
 == Upgrade Notice ==
 
+= 1.0.1 ( Janyary 28, 2025) =
+* Bug flexibility
+* performance update
+* Included TasteWP dummy link
+
 = 1.0 =
 * Initial release
 
 == Changelog ==
+
+= 1.0.1 ( Janyary 28, 2025) =
+* Bug flexibility
+* performance update
+* Included TasteWP dummy link
+
 
 = 1.0 =
 * Initial release

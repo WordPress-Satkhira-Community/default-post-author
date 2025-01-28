@@ -2,9 +2,9 @@
 
 /**
  * Plugin Name: Default Post Author
- * Plugin URI: https://www.wpsatkhira.com/plugins/default-post-author
+ * Plugin URI: https://wordpress.org/plugins/default-post-author/
  * Description: The easiest way to set default post author in your WordPress Site.
- * Version: 1.0
+ * Version: 1.0.1
  * Requires at least: 6.1
  * Requires PHP: 7.4
  * Author: WordPress Satkhira Community
