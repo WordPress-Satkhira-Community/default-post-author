@@ -2,7 +2,7 @@
 Contributors: wpdelower, monarchwp23
 Tags: post author, default post author, wp post, posts, author management
 Requires at least: 6.1
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 8.0
 Stable tag: 2.2
 License: GPLv2 or later
