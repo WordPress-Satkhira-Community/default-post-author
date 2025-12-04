@@ -1,104 +1,143 @@
 <?php
-
 /**
  * Plugin Name: Default Post Author
- * Plugin URI: https://wordpress.org/plugins/default-post-author/
+ * Plugin URI:  https://wordpress.org/plugins/default-post-author/
  * Description: The easiest way to set default post author in your WordPress Site.
- * Version: 1.0.1
+ * Version:     2.2
  * Requires at least: 6.1
- * Requires PHP: 7.4
- * Author: WordPress Satkhira Community
- * Author URI: https://www.wpsatkhira.com
- * License: GPL v2 or later
+ * Requires PHP: 8.0
+ * Author:      MonarchWP
+ * Author URI:  https://www.monarchwp.com
+ * License:     GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: default-post-author
- * Domain Path: /languages
  */
 
-if (!defined('ABSPATH')) {
-    die; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+// Plugin constants.
+define( 'DPAP_VERSION', '2.2' );
+define( 'DPAP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'DPAP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'DPAP_OPTIONS', 'dpap_options' );
+
+// Include admin class.
+require_once DPAP_PLUGIN_DIR . 'includes/class-dpap-admin.php';
+
+/**
+ * Initialize admin.
+ *
+ * @return void
+ */
+function dpap_init() {
+    if ( is_admin() ) {
+        new DPAP_Admin();
+    }
+}
+add_action( 'plugins_loaded', 'dpap_init' );
+
+/**
+ * Get plugin option.
+ *
+ * @param string $key     Option key.
+ * @param mixed  $default Default value.
+ * @return mixed Option value.
+ */
+function dpap_get_option( $key, $default = '' ) {
+    $options = get_option( DPAP_OPTIONS, array() );
+    return isset( $options[ $key ] ) ? $options[ $key ] : $default;
 }
 
 /**
- * Load plugin textdomain.
+ * Set default author for new posts during creation only.
+ *
+ * @param array $data    Array of slashed post data.
+ * @param array $postarr Original post data.
+ * @return array Modified post data.
  */
-function dpa_load_textdomain() {
-    load_plugin_textdomain('default-post-author', false, dirname(plugin_basename(__FILE__)) . '/languages');
-}
-add_action('plugins_loaded', 'dpa_load_textdomain');
-
-
-// Add the field to the general settings page
-function dpa_add_author_setting_field() {
-    add_settings_field(
-        'default_post_author', // ID of the settings field
-        'Default Post Author', // Title of the field
-        'dpa_default_post_author_field_html', // Function to display the field
-        'general' // Page to add the field to (General Settings page)
-    );
-
-    // Register the setting
-    register_setting('general', 'default_post_author', array(
-        'type' => 'integer',
-        'description' => 'Default author ID for new posts',
-        'sanitize_callback' => 'absint', // Ensure the value is an absolute integer
-        'default' => 1 // Default value if not set
-    ));
-}
-add_action('admin_init', 'dpa_add_author_setting_field');
-
-// HTML for the settings field
-function dpa_default_post_author_field_html() {
-    $value = get_option('default_post_author', 1); // Get the current value, default to 1
-
-    // Fetch users with 'Author', 'Editor', or 'Administrator' roles
-    $user_query = new WP_User_Query(array(
-        'role__in' => array('Author', 'Editor', 'Administrator'), // Array of roles
-        'orderby' => 'display_name',
-        'order' => 'ASC'
-    ));
-
-    $users = $user_query->get_results();
-
-    // Create a dropdown list of users
-    echo '<select id="default_post_author" name="default_post_author">';
-    foreach ($users as $user) {
-        echo '<option value="' . esc_attr($user->ID) . '"' . selected($user->ID, $value, false) . '>' . esc_html($user->display_name) . '</option>';
+function dpap_force_post_author( $data, $postarr ) {
+    // Check if feature is enabled.
+    if ( ! dpap_get_option( 'enable_default_author', true ) ) {
+        return $data;
     }
-    echo '</select>';
-}
 
-// Set the default author for new posts
-function dpa_force_post_author( $data, $postarr ) {
-    // Retrieve the default author ID from WordPress options, default to 1 if not set
-    $default_author_id = get_option('default_post_author', 1);
+    $default_author_id = (int) dpap_get_option( 'default_author', 1 );
 
-    // Set the author for new posts
-    if (empty($postarr['ID'])) {
+    // Only for new posts (not updates).
+    if ( empty( $postarr['ID'] ) && 'post' === $data['post_type'] ) {
         $data['post_author'] = $default_author_id;
     }
+
     return $data;
 }
-add_filter( 'wp_insert_post_data', 'dpa_force_post_author', 10, 2 );
+add_filter( 'wp_insert_post_data', 'dpap_force_post_author', 10, 2 );
 
-// Set the revision author to the same author as the post
-function dpa_set_revision_author($post_has_changed, $last_revision, $post) {
-    global $wpdb;
-
-    // Update the post_author of the revision to match the original post
-    $result = $wpdb->update(
-        $wpdb->posts,
-        array('post_author' => $post->post_author),
-        array('ID' => $last_revision->ID),
-        array('%d'),
-        array('%d')
-    );
-
-    // Basic error handling
-    if (false === $result) {
-        error_log('Failed to update revision author for post ID ' . $post->ID);
+/**
+ * Ensure revision author matches original post author.
+ *
+ * @param int     $revision_id Revision post ID.
+ * @param WP_Post $post        The original post object.
+ * @return void
+ */
+function dpap_set_revision_author( $revision_id, $post ) {
+    // Check if feature is enabled.
+    if ( ! dpap_get_option( 'sync_revisions', true ) ) {
+        return;
     }
 
-    return $post_has_changed;
+    $revision_id = (int) $revision_id;
+    $post_author = (int) $post->post_author;
+
+    $result = wp_update_post(
+        array(
+            'ID'          => $revision_id,
+            'post_author' => $post_author,
+        ),
+        true
+    );
+
+    if ( is_wp_error( $result ) ) {
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+            error_log( 'dpap: Failed to update revision author for post ID ' . $post->ID . ': ' . $result->get_error_message() );
+        }
+    }
 }
-add_filter('wp_save_post_revision_check_for_changes', 'dpa_set_revision_author', 10, 3);
+add_action( 'wp_save_post_revision', 'dpap_set_revision_author', 10, 2 );
+
+/**
+ * Redirect to settings page on activation.
+ *
+ * @param string $plugin Plugin basename.
+ * @return void
+ */
+function dpap_activation_redirect( $plugin ) {
+    if ( plugin_basename( __FILE__ ) === $plugin ) {
+        // Set default options on first activation.
+        if ( ! get_option( DPAP_OPTIONS ) ) {
+            update_option(
+                DPAP_OPTIONS,
+                array(
+                    'default_author'        => 1,
+                    'enable_default_author' => true,
+                    'sync_revisions'        => true,
+                )
+            );
+        }
+        wp_safe_redirect( admin_url( 'options-general.php?page=default-post-author' ) );
+        exit;
+    }
+}
+add_action( 'activated_plugin', 'dpap_activation_redirect' );
+
+/**
+ * Uninstall cleanup.
+ *
+ * @return void
+ */
+function dpap_uninstall() {
+    delete_option( DPAP_OPTIONS );
+}
+register_uninstall_hook( __FILE__, 'dpap_uninstall' );
