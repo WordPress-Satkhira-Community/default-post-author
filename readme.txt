@@ -1,44 +1,48 @@
 === Default Post Author ===
-Contributors: wpdelower, monarchwp23
+Contributors: wpdelower, wpsatkhira
 Tags: post author, default post author, wp post, posts, author management
 Requires at least: 6.1
-Tested up to: 6.9
+Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.2
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Donate Link: https://www.monarchwp.com/donate
+Donate Link: https://www.wpsatkhira.com/donate
 
-The easiest way to set a default post author in your WordPress site.
+Easily set a default post author for new posts, pages and custom post types. Capability-aware, bulk update and WP-CLI support.
 
 == Description ==
 
-**Try Default Post Author on a demo site: Click here => [https://tastewp.com/plugins/default-post-author](https://tastewp.org/plugins/default-post-author/).**
+**Try Default Post Author on a demo site: Click here => [https://tastewp.com/plugins/default-post-author](https://tastewp.com/plugins/default-post-author/).**
 
-The **Default Post Author** plugin is a powerful tool designed to simplify the process of setting a default post author on your WordPress site. With this plugin, you can easily define a default author for all new posts, ensuring consistency and saving you valuable time.
+The **Default Post Author** plugin is a powerful tool designed to simplify the process of setting a default post author on your WordPress site. With this plugin, you can easily define a default author for all new posts (and other post types), ensuring consistency and saving you valuable time.
 
 = ✨ Key Features =
 
 * **Easy Setup** - Quick and straightforward configuration
 * **Modern Admin Interface** - Beautiful, intuitive settings page with smooth animations
 * **Toggle Controls** - Enable/disable features with modern toggle switches
-* **Bulk Update** - Update all existing posts to the default author with one click
+* **Multi Post-Type Support** - Apply the default author to Posts, Pages and any public Custom Post Type that supports authors
+* **Capability-Aware Assignment** - Prevents permission errors when Authors create posts (new in 2.3.0)
+* **Bulk Update** - Update existing posts to the default author with real AJAX batching and accurate progress
+* **Dry-Run Mode** - Preview how many posts would be changed before running a bulk update
+* **Post Status Filter** - Limit bulk updates to Published, Draft, Pending, etc.
 * **Revision Sync** - Keep revision authors in sync with parent posts
+* **WP-CLI Support** - Manage settings and run bulk updates from the command line
 * **AJAX-Powered** - Real-time saving without page reloads
 * **Progress Tracking** - Visual progress bar for bulk operations
 * **Responsive Design** - Works perfectly on all devices
 * **Lightweight** - Optimized code for maximum performance
+* **Developer Friendly** - Useful filters and actions for customization
 
 = 🎨 Modern Admin Interface =
 
-Version 2.2 introduces a completely redesigned admin interface featuring:
-
 * Clean, card-based layout
 * Smooth animations and transitions
-* Modern toggle switches instead of checkboxes
+* Modern toggle switches
 * Interactive buttons with loading states
 * Toast notifications for instant feedback
-* Progress indicators for bulk operations
+* Accurate progress indicators for bulk operations
 * Fully responsive design
 
 = 🚀 How It Works =
@@ -46,24 +50,38 @@ Version 2.2 introduces a completely redesigned admin interface featuring:
 1. Install and activate the plugin
 2. Navigate to **Settings > Default Post Author**
 3. Select your preferred default author from the dropdown
-4. Enable/disable features using the toggle switches
-5. Save your settings - that's it!
+4. Choose which post types should receive the default author
+5. Enable/disable features using the toggle switches
+6. Save your settings – that’s it!
 
-By selecting a default author, you ensure that every new post created on your site will automatically be attributed to that specific author. This feature is particularly useful for multi-author blogs or websites where different users contribute content regularly.
+By selecting a default author, you ensure that every new post (of the selected types) created on your site will automatically be attributed to that specific author. This feature is particularly useful for multi-author blogs or websites where different users contribute content regularly.
 
 = 🔧 Feature Toggles =
 
 * **Enable Default Author** - Turn the default author feature on/off without deactivating the plugin
+* **Only force for users who can edit others’ posts** - Recommended. Prevents the permission error that Authors encounter when the plugin tries to re-assign their new posts. Admins and Editors still receive the forced default author.
 * **Sync Revision Authors** - Keep revision authors matching the parent post author
 
 = 📦 Bulk Update Existing Posts =
 
-Need to change the author of all existing posts? The plugin includes a powerful bulk update feature that:
+Need to change the author of existing posts? The plugin includes a powerful bulk update feature that:
 
-* Processes posts in batches to prevent timeouts
-* Shows real-time progress
+* Processes posts in real AJAX batches to prevent timeouts
+* Shows accurate real-time progress
+* Supports dry-run mode so you can preview changes
+* Lets you filter by post status
 * Provides detailed completion messages
 * Works with any number of posts
+
+= 🖥️ WP-CLI Commands =
+
+```
+wp dpap set-author --author=5
+wp dpap set-author --author=5 --post-types=post,page
+wp dpap bulk-update
+wp dpap bulk-update --dry-run
+wp dpap bulk-update --author=5 --post-types=post,page --status=publish
+```
 
 = 🔒 Security =
 
@@ -80,7 +98,7 @@ Need to change the author of all existing posts? The plugin includes a powerful 
 * Works with popular themes and plugins
 
 = Contributing & Bug Report =
-Bug reports and pull requests are welcome on [Github](https://github.com/monarchwp/default-post-author).
+Bug reports and pull requests are welcome on [GitHub](https://github.com/WordPress-Satkhira-Community/default-post-author).
 
 == Installation ==
 
@@ -89,8 +107,8 @@ Bug reports and pull requests are welcome on [Github](https://github.com/monarch
 2. Search for **'Default Post Author'**
 3. Click **Install Now** and then **Activate**
 4. Go to **Settings > Default Post Author**
-5. Select your default author and configure the toggle options
-6. Click **Save Settings** - that's all!
+5. Select your default author, choose post types and configure the toggle options
+6. Click **Save Settings** - that’s all!
 
 = Manual Installation =
 1. Download the plugin zip file
@@ -113,19 +131,32 @@ Yes! The plugin is fully compatible with both single sites and WordPress multisi
 
 = Can I disable the default author feature temporarily? =
 
-Yes! Version 2.2 includes a toggle switch to enable/disable the default author feature without deactivating the plugin.
+Yes! There is a toggle switch to enable/disable the default author feature without deactivating the plugin.
+
+= Authors get a permission error when creating posts. How do I fix it? =
+
+In version 2.3.0 a new setting was added: **“Only force for users who can edit others’ posts”**.  
+Enable this option (it is enabled by default). Authors will keep their own authorship while Admins and Editors still receive the forced default author. This completely solves the permission error.
 
 = How does the bulk update feature work? =
 
-The bulk update feature processes posts in batches of 100 to prevent server timeouts. It shows a progress bar and notifies you when complete. Only posts with different authors are updated.
+The bulk update feature processes posts in real AJAX batches of 50 to prevent server timeouts. It shows an accurate progress bar and notifies you when complete. Only posts with different authors are updated. You can also run a dry-run first.
 
 = Will this affect my existing posts? =
 
-No, by default the plugin only affects new posts. To update existing posts, you must explicitly use the **Update All Posts** feature on the settings page.
+No, by default the plugin only affects new posts. To update existing posts, you must explicitly use the **Update Posts** feature on the settings page.
 
 = What happens to post revisions? =
 
-If the **Sync Revision Authors** toggle is enabled, revision authors will automatically match their parent post's author.
+If the **Sync Revision Authors** toggle is enabled, revision authors will automatically match their parent post’s author.
+
+= Can I apply the default author to Pages or Custom Post Types? =
+
+Yes! In the settings you can select any public post type that supports the author feature.
+
+= Is there WP-CLI support? =
+
+Yes. See the Description section for available commands.
 
 = How frequently is the plugin updated? =
 
@@ -143,15 +174,18 @@ Absolutely! We welcome contributions on our [GitHub repository](https://github.c
 
 1. Modern settings page with card-based layout and gradient header
 2. Default author selection with styled dropdown
-3. Feature toggles with modern switch controls
-4. Bulk update section with progress indicator
+3. Feature toggles with modern switch controls (including the new capability-aware option)
+4. Post type selection and bulk update section with progress indicator
 5. Success notification toast message
 6. Mobile responsive design
 
 == Upgrade Notice ==
 
+= 2.3.0 =
+Important update! Fixes the permission error for Author-role users, adds multi post-type support, real batch processing, dry-run mode, WP-CLI and more. Recommended for all users.
+
 = 2.2 =
-Major UI update! New modern admin interface with toggle switches, AJAX saving, progress indicators, and improved user experience. Recommended for all users.
+Major UI update! New modern admin interface with toggle switches, AJAX saving, progress indicators, and improved user experience.
 
 = 2.1 =
 Bug fixes and stability improvements.
@@ -161,7 +195,20 @@ Security and performance updates. New bulk update feature to change all existing
 
 == Changelog ==
 
-= 2.2 - (Decemeber 04, 2025) =
+= 2.3.0 - (October 13, 2026) =
+* **New:** Capability-aware default author assignment – solves the permission error when users with the Author role create posts
+* **New:** Setting “Only force for users who can edit others’ posts” (enabled by default)
+* **New:** Multi post-type support – apply the default author to Posts, Pages and any public CPT that supports authors
+* **New:** Real AJAX batch processing for bulk updates with accurate progress bar
+* **New:** Dry-run mode for bulk updates
+* **New:** Post status filter for bulk updates
+* **New:** WP-CLI commands (`wp dpap set-author` and `wp dpap bulk-update`)
+* **New:** Developer filters & actions (`dpap_enabled_post_types`, `dpap_before_set_author`, `dpap_after_set_author`, `dpap_eligible_users`, `dpap_bulk_update_args`)
+* **Improved:** Soft migration of options for existing installations
+* **Improved:** Better error handling and user feedback
+* **Improved:** Updated readme and documentation
+
+= 2.2 - (December 04, 2025) =
 * **New:** Completely redesigned modern admin interface
 * **New:** Toggle switches replace checkboxes for better UX
 * **New:** AJAX-powered settings saving (no page reload)
